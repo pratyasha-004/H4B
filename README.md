@@ -8,6 +8,7 @@ Medical Record Vault allows patients to securely upload their medical records an
 🔑 How to Use the Portal:
 
 First of all the users need to connect wallet by simply clicking on the connect wallet option(they need to install metamask)
+
 🧑‍🦱 For Patients:
 
 Go to the Upload records Section
