@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor's Dashboard</title>
+  <style>
+    :root {
+      --primary: #1f6feb;
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 30px;
+    }
+
+    .search-section {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      width: 250px;
+    }
+
+    button {
+      padding: 10px 14px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #388bfd;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #21262d;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .not-found {
+      color: red;
+      text-align: center;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔎 Doctor Portal - Search Patient</h1>
+
+    <div class="search-section">
+      <input type="text" id="patientIdInput" placeholder="Enter Patient ID (e.g. P001)" />
+      <button onclick="searchPatient()">Search</button>
+    </div>
+
+    <div id="tabs" class="tabs" style="display: none;">
+      <button class="tab-btn" onclick="showSection('documents')">📁 Documents</button>
+      <button class="tab-btn" onclick="showSection('blood')">🧬 Blood Group</button>
+      <button class="tab-btn" onclick="showSection('allergies')">⚠️ Allergies</button>
+      <button class="tab-btn" onclick="showSection('history')">🩺 Medical History</button>
+    </div>
+
+    <div id="resultContainer" class="result-card">
+      <p style="text-align:center;">Search for a patient to view their information.</p>
+    </div>
+  </div>
+
+  <script>
+    const patients = {
+      "P001": {
+        name: "John Doe",
+        bloodGroup: "A+",
+        allergies: "Peanuts, Dust",
+        history: "Diabetes, High BP",
+        documents: ["X-ray Report.pdf", "Blood Test.pdf"]
+      },
+      "P002": {
+        name: "Jane Smith",
+        bloodGroup: "B-",
+        allergies: "Penicillin",
+        history: "Asthma",
+        documents: ["MRI Report.pdf"]
+      },
+      "P003": {
+        name: "Alex Johnson",
+        bloodGroup: "O+",
+        allergies: "None",
+        history: "Healthy",
+        documents: ["Full Body Report.pdf"]
+      }
+    };
+
+    let currentPatient = null;
+
+    function searchPatient() {
+      const id = document.getElementById("patientIdInput").value.trim().toUpperCase();
+      const resultContainer = document.getElementById("resultContainer");
+      const tabs = document.getElementById("tabs");
+
+      if (!id) {
+        resultContainer.innerHTML = `<p class="not-found">Please enter a Patient ID.</p>`;
+        tabs.style.display = "none";
+        return;
+      }
+
+      const patient = patients[id];
+      if (!patient) {
+        resultContainer.innerHTML = `<p class="not-found">Patient with ID "${id}" not found.</p>`;
+        tabs.style.display = "none";
+        return;
+      }
+
+      currentPatient = patient;
+      tabs.style.display = "flex";
+
+      // Reset tab selection and show default section
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelector(".tab-btn").classList.add("active");
+      showSection('documents');
+    }
+
+    function showSection(section) {
+      const container = document.getElementById("resultContainer");
+
+      if (!currentPatient) {
+        container.innerHTML = `<p class="not-found">No patient selected.</p>`;
+        return;
+      }
+
+      // Highlight active tab
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.textContent.toLowerCase().includes(section)) {
+          btn.classList.add("active");
+        }
+      });
+
+      let content = `<h3>👤 ${currentPatient.name}</h3>`;
+
+      switch (section) {
+        case 'documents':
+          content += `<h4>📁 Documents</h4><ul>${currentPatient.documents.map(doc => `<li>${doc}</li>`).join("")}</ul>`;
+          break;
+        case 'blood':
+          content += `<h4>🧬 Blood Group</h4><p>${currentPatient.bloodGroup}</p>`;
+          break;
+        case 'allergies':
+          content += `<h4>⚠️ Allergies</h4><p>${currentPatient.allergies}</p>`;
+          break;
+        case 'history':
+          content += `<h4>🩺 Medical History</h4><p>${currentPatient.history}</p>`;
+          break;
+        default:
+          content += `<p>Invalid section.</p>`;
+      }
+
+      container.innerHTML = `<div class="result-card">${content}</div>`;
+    }
+  </script>
+</body>
+</html>

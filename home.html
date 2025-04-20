@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Medical Record Vault</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --neon-blue: #00f3ff;
+      --neon-purple: #9d00ff;
+      --neon-pink: #ff00e5;
+      --neon-green: #39ff14;
+      --dark-bg: #0a0a0a;
+      --darker-bg: #050505;
+      --light-text: #f8f8f8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--light-text);
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Splash Screen */
+    #splashScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--darker-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .splash-content {
+      text-align: center;
+    }
+
+    .splash-title {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--neon-blue);
+      text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+      animation: pulsate 1s infinite alternate;
+    }
+
+    .splash-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      color: var(--neon-purple);
+    }
+
+    .loader {
+      width: 150px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loader::after {
+      content: '';
+      width: 40%;
+      height: 100%;
+      background: var(--neon-green);
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+      animation: loading 1s linear infinite;
+      box-shadow: 0 0 10px var(--neon-green);
+    }
+
+    @keyframes loading {
+      0% { left: -40%; }
+      100% { left: 100%; }
+    }
+
+    @keyframes pulsate {
+      0% {
+        text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+      }
+      100% {
+        text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue), 0 0 45px var(--neon-blue);
+      }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .background-svg,
+    .grid-lines {
+      position: fixed;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-circle-1 {
+      top: -10%;
+      left: -10%;
+      width: 50%;
+      height: 50%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--neon-purple) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(40px);
+    }
+
+    .bg-circle-2 {
+      bottom: -20%;
+      right: -10%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--neon-blue) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(40px);
+    }
+
+    .grid-lines {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    header {
+      padding: 20px 0;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--neon-green);
+      text-shadow: 0 0 5px var(--neon-green);
+      text-decoration: none;
+    }
+
+    .wallet-connect {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      
+    }
+    .wallet-connect button{
+        padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      background-color: rgba(0, 243, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(0, 243, 255, 0.3);
+    }
+
+    #walletStatus {
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      background-color: rgba(0, 243, 255, 0.1);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+    }
+
+    .section {
+      background-color: rgba(20, 20, 20, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--neon-blue);
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+
+    /* Tabs section */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--neon-purple);
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      color: var(--light-text);
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover,
+    .tab.active {
+      background-color: var(--neon-purple);
+      box-shadow: 0 0 10px var(--neon-purple);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <div class="splash-content">
+      <div class="splash-title">Medical Record Vault</div>
+      <div class="splash-subtitle">Securing Healthcare, One Block at a Time</div>
+      <div class="loader"></div>
+    </div>
+  </div>
+
+  <!-- Background Effects -->
+  <div class="background-svg bg-circle-1"></div>
+  <div class="background-svg bg-circle-2"></div>
+  <div class="grid-lines"></div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <header>
+      <a href="#" class="logo">🩺 VaultChain</a>
+      <div class="wallet-connect">
+        <button onclick="connectWallet()">Connect Wallet</button>
+        <div id="walletStatus">Not connected</div>
+      </div>
+    </header>
+
+    <div class="section">
+      <h1>Welcome to the Medical Record Vault</h1>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="openTab('upload')">Upload Records</div>
+        <div class="tab" onclick="openTab('view')">View Records</div>
+        <div class="tab" onclick="openTab('about')">About</div>
+      </div>
+
+      <div id="upload" class="tab-content active">
+        <p>🔐 Upload your encrypted medical records securely to the blockchain.</p>
+        <!-- Upload Form or Input can go here -->
+      </div>
+
+      <div id="view" class="tab-content">
+        <p>📂 View your previously uploaded records by fetching them securely.</p>
+        <!-- Display logic here -->
+      </div>
+
+      <div id="about" class="tab-content">
+        <p>ℹ Medical Record Vault is a decentralized platform for securely managing health records.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Script -->
+  <script>
+    // Splash screen timeout
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('splashScreen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('splashScreen').style.display = 'none';
+        }, 500);
+      }, 2000);
+    });
+
+    // Tab functionality
+    function openTab(tabId) {
+      const tabs = document.querySelectorAll('.tab');
+      const contents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      contents.forEach(content => content.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Wallet Connection
+    async function connectWallet() {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          document.getElementById('walletStatus').innerText = 'Connected: ' + accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
+        } catch (err) {
+          console.error(err);
+          document.getElementById('walletStatus').innerText = 'Connection Failed';
+        }
+      } else {
+        alert("Please install MetaMask!");
+      }
+    }
+  </script>
+</body>
+</html>

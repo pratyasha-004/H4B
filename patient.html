@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Upload Portal</title>
+  <style>
+    :root {
+      --primary: #1f6feb;
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+    }
+
+    body {
+      background-color: var(--bg);
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+    }
+
+    /* Custom style for file input */
+    .file-upload-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .file-upload-wrapper input[type="file"] {
+      padding: 6px;
+      display: none;
+    }
+
+    .file-upload-wrapper label {
+      background-color: var(--primary);
+      padding: 12px 20px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .file-upload-wrapper label:hover {
+      background-color: #388bfd;
+    }
+
+    .file-names {
+      margin-top: 10px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #388bfd;
+    }
+
+    .success {
+      background: #1c7c54;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📤 Patient Upload Section</h1>
+    <form id="patientForm">
+      <label for="patientId">Patient ID (Leave blank to auto-generate):</label>
+      <input type="text" id="patientId" placeholder="e.g. P004">
+
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" required>
+
+      <label for="bloodGroup">Blood Group:</label>
+      <select id="bloodGroup" required>
+        <option value="">Select</option>
+        <option>A+</option>
+        <option>A-</option>
+        <option>B+</option>
+        <option>B-</option>
+        <option>AB+</option>
+        <option>AB-</option>
+        <option>O+</option>
+        <option>O-</option>
+      </select>
+
+      <label for="allergies">Allergies:</label>
+      <textarea id="allergies" rows="2" placeholder="e.g. Peanuts, Dust, etc."></textarea>
+
+      <label for="history">Medical History:</label>
+      <textarea id="history" rows="3" placeholder="e.g. Diabetes, Asthma, etc."></textarea>
+
+      <label for="medications">Medications:</label>
+      <textarea id="medications" rows="2"></textarea>
+
+      <label>Upload Medical Documents:</label>
+      <div class="file-upload-wrapper">
+        <input type="file" id="documents" multiple onchange="updateFileNames()">
+        <label for="documents">Choose Files</label>
+      </div>
+      <div id="fileNames" class="file-names"></div>
+
+      <button type="submit">Submit Record</button>
+    </form>
+
+    <div id="confirmation" class="success" style="display: none;"></div>
+  </div>
+
+  <script>
+    let patientCounter = 4;
+
+    // Function to display file names after selection
+    function updateFileNames() {
+      const files = document.getElementById('documents').files;
+      const fileNamesContainer = document.getElementById('fileNames');
+      const fileNames = Array.from(files).map(file => file.name).join(', ');
+
+      fileNamesContainer.textContent = fileNames ? `Selected files: ${fileNames}` : '';
+    }
+
+    document.getElementById('patientForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const enteredId = document.getElementById('patientId').value.trim().toUpperCase();
+      const name = document.getElementById('name').value;
+      const bloodGroup = document.getElementById('bloodGroup').value;
+      const allergies = document.getElementById('allergies').value;
+      const history = document.getElementById('history').value;
+      const medications = document.getElementById('medications').value;
+      const files = document.getElementById('documents').files;
+
+      const documentNames = Array.from(files).map(file => file.name);
+
+      let finalId = enteredId || `P${String(patientCounter).padStart(3, '0')}`;
+      if (!enteredId) patientCounter++;
+
+      const patientData = {
+        id: finalId,
+        name,
+        bloodGroup,
+        allergies,
+        history,
+        medications,
+        documents: documentNames
+      };
+
+      // Show confirmation
+      const confirmationBox = document.getElementById('confirmation');
+      confirmationBox.innerHTML = `
+        ✅ Record submitted successfully!<br>
+        <strong>Patient ID:</strong> ${patientData.id}<br>
+        <strong>Name:</strong> ${patientData.name}
+      `;
+      confirmationBox.style.display = 'block';
+
+      this.reset();
+    });
+  </script>
+</body>
+</html>
