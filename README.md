@@ -1,6 +1,6 @@
 Description:
 
-Medical Record Vault allows patients to securely upload their medical records and enables doctors to verify those records using blockchain technology. The platform ensures that medical data remains tamper-proof, transparent, and verifiable, without exposing sensitive personal information directly on the blockchain.
+Medical Record Vault allows patients to securely upload their medical records and enables doctors to view those records and access them during emergency situation using blockchain technology. The platform ensures that medical data remains tamper-proof, transparent, and verifiable, without exposing sensitive personal information directly on the blockchain.
 
 🔑 How to Use the Portal:
 First of all the users need to connect wallet by simply clicking on the connect wallet option(they need to install metamask)
