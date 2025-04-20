@@ -1,3 +1,4 @@
+<br> MEDICAL RECORD VAULT<br>
 Description:
 
 Medical Record Vault allows patients to securely upload their medical records and enables doctors to view those records and access them during emergency situation using blockchain technology. The platform ensures that medical data remains tamper-proof, transparent, and verifiable, without exposing sensitive personal information directly on the blockchain.
